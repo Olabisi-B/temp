@@ -464,11 +464,11 @@ with explorer_tab:
     # Toggle between wide and long file
     sql_mode = st.radio(
         "Choose data source for SQL query:",
-        ["database/AQUERY_long.parquet (tidy)", "AQUERY.parquet (wide)"],
+        ["database/AQUERY_long.parquet (tidy)", "database/AQUERY.parquet (wide)"],
         index=0
     )
     if "wide" in sql_mode:
-        query = query.replace("database/AQUERY_long.parquet", "AQUERY.parquet")
+        query = query.replace("database/AQUERY_long.parquet", "database/AQUERY.parquet")
 
     if st.button("Run Query"):
         df = run_duckdb_query(query) # Use the cached function
