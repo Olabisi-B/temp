@@ -62,25 +62,25 @@ full_species_df = run_duckdb_query(full_species_list_query)
 total_unique_species = len(full_species_df)
 
 # Query to calculate the total unique samples in the full dataset 
-total_samples_query = "SELECT COUNT(DISTINCT accession) AS total_samples FROM read_parquet('AQUERY_long.parquet');"
+total_samples_query = "SELECT COUNT(DISTINCT accession) AS total_samples FROM read_parquet('database/AQUERY_long.parquet');"
 total_unique_samples = run_duckdb_query(total_samples_query)['total_samples'].iloc[0]
 
 # Query to pre-populate the species list
 SPECIES_SELECT_LIMIT = 500
 limited_species_list_query = f"""
     SELECT DISTINCT species 
-    FROM read_parquet('AQUERY_long.parquet')
+    FROM read_parquet('database/AQUERY_long.parquet')
     ORDER BY species
     LIMIT {SPECIES_SELECT_LIMIT}
 """
 species_list = run_duckdb_query(limited_species_list_query)["species"].tolist()
 
 # Query to pre-populate the season list
-season_query = "SELECT DISTINCT season FROM read_parquet('AQUERY_long.parquet') WHERE season IS NOT NULL AND season != '' ORDER BY season;"
+season_query = "SELECT DISTINCT season FROM read_parquet('database/AQUERY_long.parquet') WHERE season IS NOT NULL AND season != '' ORDER BY season;"
 seasons = run_duckdb_query(season_query)['season'].tolist()
 
 # Depth calculation for slider bounds
-unique_depths_df = run_duckdb_query("SELECT DISTINCT depth FROM read_parquet('AQUERY_long.parquet') WHERE depth IS NOT NULL;")
+unique_depths_df = run_duckdb_query("SELECT DISTINCT depth FROM read_parquet('database/AQUERY_long.parquet') WHERE depth IS NOT NULL;")
 
 if not unique_depths_df.empty:
     unique_depth_strings = unique_depths_df['depth'].astype(str).tolist()
@@ -114,17 +114,17 @@ with explorer_tab:
     st.sidebar.header("Example Queries")
     
     example_queries = {
-        "View first 20 rows (long)": "SELECT * FROM read_parquet('AQUERY_long.parquet') LIMIT 20;",
+        "View first 20 rows (long)": "SELECT * FROM read_parquet('database/AQUERY_long.parquet') LIMIT 20;",
         "View first 20 rows (wide)": "SELECT * FROM read_parquet('AQUERY.parquet') LIMIT 20;",
         "List all columns (wide)": "PRAGMA table_info(read_parquet('AQUERY.parquet'));",
-        "Count total samples": "SELECT COUNT(*) AS total_samples FROM read_parquet('AQUERY_long.parquet');",
+        "Count total samples": "SELECT COUNT(*) AS total_samples FROM read_parquet('database/AQUERY_long.parquet');",
         "Metadata, Species & Abundance (>0)": """
             -- Select all metadata + species/abundance where abundance is greater than 0
             SELECT 
                 accession, latitude, longitude, season, depth, temperature, salinity, ph, 
                 carbon, phosphorus, carbon_dioxide, nitrogen, oxygen_concentration, 
                 phosphate, chlorophyll, chloride, date, species, abundance
-            FROM read_parquet('AQUERY_long.parquet')
+            FROM read_parquet('database/AQUERY_long.parquet')
             WHERE abundance > 0
             LIMIT 50;
         """,
@@ -135,7 +135,7 @@ with explorer_tab:
         """,
         "Top 10 species by abundance": """
             SELECT species, SUM(abundance) AS total_abundance
-            FROM read_parquet('AQUERY_long.parquet')
+            FROM read_parquet('database/AQUERY_long.parquet')
             GROUP BY species
             ORDER BY total_abundance DESC
             LIMIT 10;
@@ -185,7 +185,7 @@ with explorer_tab:
     where_clause = "WHERE " + " AND ".join(filter_conditions) if filter_conditions else ""
     filter_query = f"""
         SELECT *
-        FROM read_parquet('AQUERY_long.parquet')
+        FROM read_parquet('database/AQUERY_long.parquet')
         {where_clause}
         LIMIT 100000
     """
@@ -464,11 +464,11 @@ with explorer_tab:
     # Toggle between wide and long file
     sql_mode = st.radio(
         "Choose data source for SQL query:",
-        ["AQUERY_long.parquet (tidy)", "AQUERY.parquet (wide)"],
+        ["database/AQUERY_long.parquet (tidy)", "AQUERY.parquet (wide)"],
         index=0
     )
     if "wide" in sql_mode:
-        query = query.replace("AQUERY_long.parquet", "AQUERY.parquet")
+        query = query.replace("database/AQUERY_long.parquet", "AQUERY.parquet")
 
     if st.button("Run Query"):
         df = run_duckdb_query(query) # Use the cached function
