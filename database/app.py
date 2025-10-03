@@ -55,7 +55,7 @@ def parse_depth_string(depth_str):
 #pre-populate the full species list (cached for summary)
 full_species_list_query = """
     SELECT DISTINCT species 
-    FROM read_parquet('AQUERY_long.parquet')
+    FROM read_parquet('database/AQUERY_long.parquet')
     ORDER BY species
 """
 full_species_df = run_duckdb_query(full_species_list_query)
@@ -115,8 +115,8 @@ with explorer_tab:
     
     example_queries = {
         "View first 20 rows (long)": "SELECT * FROM read_parquet('database/AQUERY_long.parquet') LIMIT 20;",
-        "View first 20 rows (wide)": "SELECT * FROM read_parquet('AQUERY.parquet') LIMIT 20;",
-        "List all columns (wide)": "PRAGMA table_info(read_parquet('AQUERY.parquet'));",
+        "View first 20 rows (wide)": "SELECT * FROM read_parquet('database/AQUERY.parquet') LIMIT 20;",
+        "List all columns (wide)": "PRAGMA table_info(read_parquet('database/AQUERY.parquet'));",
         "Count total samples": "SELECT COUNT(*) AS total_samples FROM read_parquet('database/AQUERY_long.parquet');",
         "Metadata, Species & Abundance (>0)": """
             -- Select all metadata + species/abundance where abundance is greater than 0
@@ -130,7 +130,7 @@ with explorer_tab:
         """,
         "Distinct lat/long pairs": """
             SELECT DISTINCT latitude, longitude
-            FROM read_parquet('AQUERY_long.parquet')
+            FROM read_parquet('database/AQUERY_long.parquet')
             LIMIT 20;
         """,
         "Top 10 species by abundance": """
